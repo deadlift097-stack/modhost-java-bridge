@@ -22,8 +22,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with: { path: bridge }
+      - uses: actions/checkout@v4
+        with:
+          repository: QYCottage/levilauncher-android-mod-template
+          path: tpl
       - uses: actions/download-artifact@v4
-        with: { name: java-dex, path: build/java }
+        with: { name: java-dex, path: bridge/build/java }
       - uses: android-actions/setup-android@v3
         with:
           packages: ''
@@ -31,12 +36,15 @@ jobs:
         run: |
           sdkmanager "ndk;28.2.13676358" "cmake;3.22.1"
           sudo apt-get install -y ninja-build
+      - name: Overlay bridge onto template
+        run: python3 bridge/scripts/overlay.py bridge tpl
       - name: Build .levipack
         shell: pwsh
+        working-directory: tpl
         run: ./scripts/package.ps1 -Abi arm64-v8a
       - uses: actions/upload-artifact@v4
         with:
           name: levipack
           path: |
-            **/*.levipack
-            build/java/mods/*
+            tpl/**/*.levipack
+            bridge/build/java/mods/*
