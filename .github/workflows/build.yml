@@ -36,8 +36,26 @@ jobs:
         run: |
           sdkmanager "ndk;28.2.13676358" "cmake;3.22.1"
           sudo apt-get install -y ninja-build
-      - name: Overlay bridge onto template
-        run: python3 bridge/scripts/overlay.py bridge tpl
+      - name: Patch overlay anchor & apply bridge
+        run: |
+          python3 -c '
+          import glob, re
+
+          mymod_files = glob.glob("tpl/**/MyMod.cpp", recursive=True)
+          if mymod_files:
+              with open(mymod_files[0], "r") as f:
+                  cpp = f.read()
+              match = re.search(r"(getSelf\(\)\.getLogger\(\)\.\w+\([^)]*\);)", cpp)
+              if match:
+                  actual_anchor = match.group(1)
+                  with open("bridge/scripts/overlay.py", "r") as f:
+                      script = f.read()
+                  script = script.replace("getSelf().getLogger().debug(\"Loading...\");", actual_anchor)
+                  with open("bridge/scripts/overlay.py", "w") as f:
+                      f.write(script)
+                  print(f"Updated anchor to: {actual_anchor}")
+          '
+          python3 bridge/scripts/overlay.py bridge tpl
       - name: Build .levipack
         shell: pwsh
         working-directory: tpl
