@@ -8,10 +8,9 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
         with: { distribution: temurin, java-version: '17' }
+      - uses: android-actions/setup-android@v3
       - name: Android SDK pieces
-        run: |
-          yes | sdkmanager --licenses >/dev/null || true
-          sdkmanager "build-tools;35.0.0" "platforms;android-35"
+        run: sdkmanager "build-tools;35.0.0" "platforms;android-35"
       - run: ./scripts/build-java.sh
       - uses: actions/upload-artifact@v4
         with: { name: java-dex, path: build/java }
@@ -23,9 +22,9 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with: { name: java-dex, path: build/java }
+      - uses: android-actions/setup-android@v3
       - name: NDK + CMake
         run: |
-          yes | sdkmanager --licenses >/dev/null || true
           sdkmanager "ndk;28.2.13676358" "cmake;3.22.1"
           sudo apt-get install -y ninja-build
       - name: Build .levipack
