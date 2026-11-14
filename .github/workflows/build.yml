@@ -9,6 +9,8 @@ jobs:
       - uses: actions/setup-java@v4
         with: { distribution: temurin, java-version: '17' }
       - uses: android-actions/setup-android@v3
+        with:
+          packages: ''
       - name: Android SDK pieces
         run: sdkmanager "build-tools;35.0.0" "platforms;android-35"
       - run: ./scripts/build-java.sh
@@ -23,6 +25,8 @@ jobs:
       - uses: actions/download-artifact@v4
         with: { name: java-dex, path: build/java }
       - uses: android-actions/setup-android@v3
+        with:
+          packages: ''
       - name: NDK + CMake
         run: |
           sdkmanager "ndk;28.2.13676358" "cmake;3.22.1"
